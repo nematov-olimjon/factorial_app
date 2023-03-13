@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Factorial Calculator</title>
+    <style>
+        #result {
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+    </style>
+    </head>
+    <body>
+        <h1>Factorial Calculator</h1>
+        <form onsubmit="sendMessage(); return false;">
+            <label for="number">Enter a number:</label>
+            <input type="number" id="number" name="number">
+            <button type="submit">Calculate Factorial</button>
+        </form>
+        <div id="result"></div>
+        <script>
+            var ws = new WebSocket("ws://localhost:8000/ws");
+
+            function handleResponse(event) {
+                var result = document.getElementById("result");
+                var response = event.data;
+                if (response.startsWith("Error:")) {
+                    result.innerHTML = "<p style='color:red'>" + response + "</p>";
+                } else {
+                    result.innerHTML = "<p>Factorial: " + response + "</p>";
+                }
+                ws.removeEventListener("message", handleResponse);
+                ws.addEventListener("message", handleResponse);
+            }
+
+            ws.addEventListener("message", handleResponse);
+
+            function sendMessage() {
+                var result = document.getElementById("result");
+                result.innerHTML = "";
+                var number = document.getElementById("number").value;
+                ws.send(number);
+            }
+        </script>
+    </body>
+</html>
+
